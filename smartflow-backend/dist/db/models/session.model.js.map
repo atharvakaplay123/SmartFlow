@@ -1,0 +1,1 @@
+{"version":3,"file":"session.model.js","sourceRoot":"","sources":["../../../src/db/models/session.model.ts"],"names":[],"mappings":"AAAA,OAAO,QAAQ,MAAM,UAAU,CAAC;AAEhC,MAAM,YAAY,GAAG,IAAI,QAAQ,CAAC,MAAM,CAAC;IACrC,WAAW,EAAE,MAAM;IACnB,YAAY,EAAE,MAAM;CACvB,CAAC,CAAA;AAEF,MAAM,CAAC,MAAM,OAAO,GAAG,QAAQ,CAAC,KAAK,CAAC,SAAS,EAAE,YAAY,CAAC,CAAA"}
