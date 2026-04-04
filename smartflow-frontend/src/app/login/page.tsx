@@ -18,7 +18,7 @@ export default function LoginPage() {
 
     try {
       // POST request to your authentication endpoint
-      const response = await fetch("http://localhost:5050/api/auth/admin-signup", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL!}/api/auth/admin-signup`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
