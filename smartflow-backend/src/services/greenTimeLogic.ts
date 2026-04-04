@@ -1,5 +1,8 @@
-// import type { trafficStateOfSquare } from "../types.js";
+import type { vehicleCountABC, vehicleCountD } from "../types.js";
 
-// export async function greenTimeLogic(vehicleCount: trafficStateOfSquare):Promise<trafficStateOfSquare>{
+export async function greenTimeLogicABC(vehicleCount: vehicleCountABC):Promise<vehicleCountABC>{
     
-// }
+}
+export async function greenTimeLogicD(vehicleCount: vehicleCountD):Promise<vehicleCountD>{
+    
+}
