@@ -128,6 +128,7 @@ export default function TrafficSimulation() {
         return JSON.parse(text);
       }).then(data => {
         console.log('[API ABC Response]', data);
+
       }).catch(err => console.error('[API ABC Error]', err));
     }
 
@@ -144,6 +145,7 @@ export default function TrafficSimulation() {
         return JSON.parse(text);
       }).then(data => {
         console.log('[API D Response]', data);
+        
       }).catch(err => console.error('[API D Error]', err));
     }
   }, [isRunning, timeLeft, cycleIndex, positionInCycle, cycleNumber, activeRoad, densities]);
