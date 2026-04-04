@@ -4,7 +4,7 @@ import { Camera, Activity, Cpu, Timer, ArrowLeft, ArrowRight, ArrowUp, ArrowDown
 
 function TrafficLight({ roadId, activeRoad, className, arrowDir }: { roadId: string, activeRoad: string, className?: string, arrowDir?: 'up' | 'down' | 'left' | 'right' }) {
    const isActive = roadId === activeRoad;
-   
+
    return (
       <div className={`absolute flex flex-col items-center gap-1.5 z-40 ${className}`}>
          {/* Up Arrow for Road B */}
@@ -40,15 +40,15 @@ function TrafficLight({ roadId, activeRoad, className, arrowDir }: { roadId: str
    )
 }
 
-function DensitySlider({ road, value, onChange, isActive }: { road: string, value: number, onChange: (val: number) => void, isActive: boolean }) {
+function DensitySlider({ road, value, onChange, isActive, disabled }: { road: string, value: number, onChange: (val: number) => void, isActive: boolean, disabled?: boolean }) {
   return (
-    <div className={`flex flex-col gap-3 p-4 rounded-xl border transition-all duration-300 ${isActive ? 'border-[#2F80ED] bg-blue-50/30 shadow-sm' : 'border-slate-200 bg-slate-50 hover:border-slate-300'}`}>
+    <div className={`flex flex-col gap-3 p-4 rounded-xl border transition-all duration-300 ${isActive ? 'border-[#2F80ED] bg-blue-50/30 shadow-sm' : 'border-slate-200 bg-slate-50 hover:border-slate-300'} ${disabled ? 'opacity-70' : ''}`}>
        <div className="flex justify-between items-center text-sm">
            <span className="font-bold text-[#0B2A4A] flex items-center gap-2">
               <Car className={`w-4 h-4 ${isActive ? 'text-[#2F80ED]' : 'text-slate-400'}`} /> Road {road}
            </span>
            <span className={`font-mono px-2 py-0.5 rounded-md text-xs font-black border ${isActive ? 'bg-[#2F80ED]/10 text-[#2F80ED] border-[#2F80ED]/20' : 'bg-white text-slate-600 border-slate-200'}`}>
-              {value}%
+              {value} veh
            </span>
        </div>
        <input 
@@ -57,70 +57,114 @@ function DensitySlider({ road, value, onChange, isActive }: { road: string, valu
          min="0" max="100" 
          value={value}
          onChange={(e) => onChange(parseInt(e.target.value))}
-         className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#2F80ED]"
+         disabled={disabled}
+         className={`w-full h-2 bg-slate-200 rounded-lg appearance-none accent-[#2F80ED] ${disabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}
        />
     </div>
   )
 }
 
 export default function TrafficSimulation() {
+  const [sliderValues, setSliderValues] = useState({ A: 20, B: 60, C: 40, D: 30 });
   const [densities, setDensities] = useState({ A: 20, B: 60, C: 40, D: 30 });
   const [cycleIndex, setCycleIndex] = useState(0);
   const [timeLeft, setTimeLeft] = useState(-1);
+  const [isRunning, setIsRunning] = useState(false);
+
+  // Constants
+  const GREEN_TIME = 10; // Every signal gets exactly 10 seconds
+  const CYCLE_TIME = GREEN_TIME * 4; // 40s total per cycle
+
+  // Which full cycle are we in? (0 = first, 1 = second, ...)
+  const cycleNumber = Math.floor(cycleIndex / 4);
+  const positionInCycle = cycleIndex % 4; // 0=1st, 1=2nd, 2=3rd, 3=4th
+
+  // Determine signal order — no useMemo to avoid stale cache during first cycle
+  let orderedRoads: string[];
+  if (cycleNumber === 0) {
+    // First cycle: ALWAYS fixed A → B → C → D
+    orderedRoads = ['A', 'B', 'C', 'D'];
+  } else {
+    // Subsequent cycles: sort A, B, C by vehicle density (highest first), D always last
+    const abc: [string, number][] = [
+      ['A', densities.A],
+      ['B', densities.B],
+      ['C', densities.C],
+    ];
+    abc.sort((a, b) => b[1] - a[1]);
+    orderedRoads = [...abc.map(x => x[0]), 'D'];
+  }
+
+  // Active road based on position in the ordered sequence
+  const activeRoad = orderedRoads[positionInCycle];
+
+  // Set timer when a new signal phase begins
+  useEffect(() => {
+    if (timeLeft === -1 && isRunning) {
+      setTimeLeft(GREEN_TIME);
+    }
+  }, [timeLeft, isRunning]);
+
+  // API trigger — fires exactly once when timer reaches 10s remaining
+  const apiTriggeredRef = React.useRef(-1);
+
+  useEffect(() => {
+    if (!isRunning || timeLeft !== GREEN_TIME) return;
+    if (apiTriggeredRef.current === cycleIndex) return;
+    apiTriggeredRef.current = cycleIndex;
+
+    const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL?.replace(/\/+$/, '');
+
+    // Position 3 (4th signal = always D) → send A, B, C vehicle counts
+    if (positionInCycle === 3) {
+      console.log(`[Cycle ${cycleNumber}] 4th signal (${activeRoad}) started — calling /api/traffic/abc`);
+      fetch(`${baseUrl}/api/greentime/ABC`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ A: densities.A, B: densities.B, C: densities.C })
+      }).then(async res => {
+        const text = await res.text();
+        if (!res.ok) throw new Error(`HTTP ${res.status}: ${text.substring(0, 100)}`);
+        return JSON.parse(text);
+      }).then(data => {
+        console.log('[API ABC Response]', data);
+      }).catch(err => console.error('[API ABC Error]', err));
+    }
+
+    // Position 2 (3rd signal in priority order) → send D vehicle count
+    if (positionInCycle === 2) {
+      console.log(`[Cycle ${cycleNumber}] 3rd signal (${activeRoad}) started — calling /api/traffic/d`);
+      fetch(`${baseUrl}/api/greentime/D`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ D: densities.D })
+      }).then(async res => {
+        const text = await res.text();
+        if (!res.ok) throw new Error(`HTTP ${res.status}: ${text.substring(0, 100)}`);
+        return JSON.parse(text);
+      }).then(data => {
+        console.log('[API D Response]', data);
+      }).catch(err => console.error('[API D Error]', err));
+    }
+  }, [isRunning, timeLeft, cycleIndex, positionInCycle, cycleNumber, activeRoad, densities]);
+
+  // Countdown timer
+  useEffect(() => {
+    if (!isRunning) return;
+    const interval = setInterval(() => {
+      setTimeLeft(prev => {
+        if (prev <= 1) {
+          setCycleIndex(c => c + 1);
+          return -1;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [isRunning]);
 
   const totalDensity = densities.A + densities.B + densities.C + densities.D;
-
-  const { CYCLE_TIME, currentGreenTimes } = useMemo(() => {
-    let cycleTime = 120;
-    if (totalDensity <= 40) {
-      cycleTime = 60;   // low traffic
-    } else if (totalDensity <= 120) {
-      cycleTime = 90;   // medium traffic
-    } else {
-      cycleTime = 120;  // heavy traffic
-    }
-
-    if (totalDensity === 0) {
-      return { CYCLE_TIME: cycleTime, currentGreenTimes: { A: cycleTime / 4, B: cycleTime / 4, C: cycleTime / 4, D: cycleTime / 4 } };
-    }
-    
-    return {
-      CYCLE_TIME: cycleTime,
-      currentGreenTimes: {
-        A: Math.max(5, Math.round((densities.A / totalDensity) * cycleTime)),
-        B: Math.max(5, Math.round((densities.B / totalDensity) * cycleTime)),
-        C: Math.max(5, Math.round((densities.C / totalDensity) * cycleTime)),
-        D: Math.max(5, Math.round((densities.D / totalDensity) * cycleTime)),
-      }
-    };
-  }, [densities, totalDensity]);
-
-  const orderedRoads = useMemo(() => {
-    return (Object.entries(currentGreenTimes) as [keyof typeof densities, number][])
-      .sort((a, b) => b[1] - a[1])
-      .map(entry => entry[0]);
-  }, [currentGreenTimes]);
-
-  const activeRoad = orderedRoads[cycleIndex % 4] || 'A';
-
-  useEffect(() => {
-     if (timeLeft === -1) {
-         setTimeLeft(currentGreenTimes[activeRoad as keyof typeof currentGreenTimes]);
-     }
-  }, [timeLeft, currentGreenTimes, activeRoad]);
-
-  useEffect(() => {
-      const interval = setInterval(() => {
-          setTimeLeft(prev => {
-             if (prev <= 1) {
-                 setCycleIndex(c => c + 1);
-                 return -1;
-             }
-             return prev - 1;
-          });
-      }, 1000);
-      return () => clearInterval(interval);
-  }, []);
+  const currentGreenTimes = { A: GREEN_TIME, B: GREEN_TIME, C: GREEN_TIME, D: GREEN_TIME };
 
   return (
     <div className="min-h-screen bg-[#F5F8FC] text-[#0B2A4A] p-6 flex flex-col font-sans selection:bg-[#2F80ED]/20">
@@ -196,10 +240,10 @@ export default function TrafficSimulation() {
                 </div>
 
                 {/* Traffic Signals */}
-                <TrafficLight roadId="A" activeRoad={activeRoad} className="left-[calc(50%+85px)] bottom-[calc(50%+100px)]" arrowDir="left" />
-                <TrafficLight roadId="B" activeRoad={activeRoad} className="left-[calc(50%+100px)] top-[calc(50%+85px)]" arrowDir="up" />
-                <TrafficLight roadId="C" activeRoad={activeRoad} className="right-[calc(50%+85px)] top-[calc(50%+100px)]" arrowDir="right" />
-                <TrafficLight roadId="D" activeRoad={activeRoad} className="right-[calc(50%+100px)] bottom-[calc(50%+85px)]" arrowDir="down" />
+                <TrafficLight roadId="B" activeRoad={activeRoad} className="left-[calc(50%+85px)] bottom-[calc(50%+100px)]" arrowDir="left" />
+                <TrafficLight roadId="C" activeRoad={activeRoad} className="left-[calc(50%+100px)] top-[calc(50%+85px)]" arrowDir="up" />
+                <TrafficLight roadId="D" activeRoad={activeRoad} className="right-[calc(50%+85px)] top-[calc(50%+100px)]" arrowDir="right" />
+                <TrafficLight roadId="A" activeRoad={activeRoad} className="right-[calc(50%+100px)] bottom-[calc(50%+85px)]" arrowDir="down" />
              </div>
            </div>
         </div>
@@ -210,13 +254,29 @@ export default function TrafficSimulation() {
                <h3 className="text-sm font-black text-[#0B2A4A] uppercase tracking-wider mb-6 flex items-center gap-2">
                  <Cpu className="h-5 w-5 text-[#2F80ED]" /> Density Controls
                </h3>
-               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  <DensitySlider road="A" value={densities.A} onChange={(val) => setDensities(d => ({ ...d, A: val }))} isActive={activeRoad === 'A'} />
-                  <DensitySlider road="B" value={densities.B} onChange={(val) => setDensities(d => ({ ...d, B: val }))} isActive={activeRoad === 'B'} />
-                  <DensitySlider road="C" value={densities.C} onChange={(val) => setDensities(d => ({ ...d, C: val }))} isActive={activeRoad === 'C'} />
-                  <DensitySlider road="D" value={densities.D} onChange={(val) => setDensities(d => ({ ...d, D: val }))} isActive={activeRoad === 'D'} />
+               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
+                  <DensitySlider road="A" value={sliderValues.A} onChange={(val) => setSliderValues(d => ({ ...d, A: val }))} isActive={activeRoad === 'A'} disabled={isRunning} />
+                  <DensitySlider road="B" value={sliderValues.B} onChange={(val) => setSliderValues(d => ({ ...d, B: val }))} isActive={activeRoad === 'B'} disabled={isRunning} />
+                  <DensitySlider road="C" value={sliderValues.C} onChange={(val) => setSliderValues(d => ({ ...d, C: val }))} isActive={activeRoad === 'C'} disabled={isRunning} />
+                  <DensitySlider road="D" value={sliderValues.D} onChange={(val) => setSliderValues(d => ({ ...d, D: val }))} isActive={activeRoad === 'D'} disabled={isRunning} />
                </div>
-           </div>
+
+               <button 
+                  onClick={() => {
+                     if (isRunning) {
+                         setIsRunning(false);
+                         setCycleIndex(0);
+                         setTimeLeft(-1);
+                     } else {
+                         setDensities(sliderValues);
+                         setIsRunning(true);
+                     }
+                  }}
+                  className={`w-full ${isRunning ? 'bg-[#EB5757] hover:bg-[#C93030]' : 'bg-[#2F80ED] hover:bg-[#1C6DD0]'} text-white font-black uppercase tracking-widest py-4 rounded-xl shadow-md transition-all active:scale-[0.98]`}
+               >
+                  {isRunning ? 'Stop Simulation' : 'Start Simulation'}
+               </button>
+            </div>
 
            {/* AI Traffic Analytics replacing line graph with Signal Allocations */}
            <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-8 flex flex-col">
@@ -227,7 +287,7 @@ export default function TrafficSimulation() {
                <div className="flex gap-4 mb-6">
                   <div className="flex-1 bg-slate-50 border border-slate-200 rounded-xl p-4">
                      <span className="text-slate-500 text-[10px] font-bold uppercase block mb-1">Total Vehicles</span>
-                     <span className="text-2xl font-black text-[#0B2A4A]">{Math.floor(totalDensity * 8.4).toLocaleString()}</span>
+                     <span className="text-2xl font-black text-[#0B2A4A]">{totalDensity.toLocaleString()}</span>
                   </div>
                   <div className="flex-1 bg-slate-50 border border-slate-200 rounded-xl p-4">
                      <span className="text-slate-500 text-[10px] font-bold uppercase block mb-1">Congestion Indicator</span>
