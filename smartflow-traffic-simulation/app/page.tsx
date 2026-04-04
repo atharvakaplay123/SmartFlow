@@ -61,14 +61,17 @@ export default function TrafficSimulation() {
   const [cycleIndex, setCycleIndex] = useState(0);
   const [timeLeft, setTimeLeft] = useState(-1);
   const [isRunning, setIsRunning] = useState(false);
+  const [cycleGreenTimes, setCycleGreenTimes] = useState<Record<string, number>[]>([{ A: 10, B: 10, C: 10, D: 10 }]);
 
   // Constants
-  const GREEN_TIME = 10; // Every signal gets exactly 10 seconds
-  const CYCLE_TIME = GREEN_TIME * 4; // 40s total per cycle
+  const GREEN_TIME = 10; // First cycle fallbacks
 
   // Which full cycle are we in? (0 = first, 1 = second, ...)
   const cycleNumber = Math.floor(cycleIndex / 4);
   const positionInCycle = cycleIndex % 4; // 0=1st, 1=2nd, 2=3rd, 3=4th
+
+  const currentGreenTimes = cycleGreenTimes[cycleNumber] || { A: 10, B: 10, C: 10, D: 10 };
+  const CYCLE_TIME = currentGreenTimes.A + currentGreenTimes.B + currentGreenTimes.C + currentGreenTimes.D;
 
   // Determine signal order — no useMemo to avoid stale cache during first cycle
   let orderedRoads: string[];
@@ -76,11 +79,11 @@ export default function TrafficSimulation() {
     // First cycle: ALWAYS fixed A → B → C → D
     orderedRoads = ['A', 'B', 'C', 'D'];
   } else {
-    // Subsequent cycles: sort A, B, C by vehicle density (highest first), D always last
+    // Subsequent cycles: sort A, B, C by newly fetched optimal green times (highest green time first), D always last
     const abc: [string, number][] = [
-      ['A', densities.A],
-      ['B', densities.B],
-      ['C', densities.C],
+      ['A', currentGreenTimes.A],
+      ['B', currentGreenTimes.B],
+      ['C', currentGreenTimes.C],
     ];
     abc.sort((a, b) => b[1] - a[1]);
     orderedRoads = [...abc.map(x => x[0]), 'D'];
@@ -88,66 +91,89 @@ export default function TrafficSimulation() {
 
   // Active road based on position in the ordered sequence. If not running, all signals remain red (no active road).
   const activeRoad = isRunning ? orderedRoads[positionInCycle] : null;
+  const currentActiveTime = activeRoad ? currentGreenTimes[activeRoad as keyof typeof currentGreenTimes] : GREEN_TIME;
+
+  // Watch for phase endings securely outside of strict-mode updaters
+  const prevTimeLeftRef = React.useRef(timeLeft);
+
+  useEffect(() => {
+    // If time dropped to -1 from a valid running timer, we successfully completed a phase!
+    if (isRunning && timeLeft === -1 && prevTimeLeftRef.current > 0) {
+      setCycleIndex(c => c + 1);
+    }
+    prevTimeLeftRef.current = timeLeft;
+  }, [timeLeft, isRunning]);
 
   // Set timer when a new signal phase begins
   useEffect(() => {
-    if (timeLeft === -1 && isRunning) {
-      setTimeLeft(GREEN_TIME);
+    if (timeLeft === -1 && isRunning && activeRoad) {
+      setTimeLeft(currentActiveTime);
     }
-  }, [timeLeft, isRunning]);
+  }, [timeLeft, isRunning, activeRoad, currentActiveTime]);
 
-  // API trigger — fires exactly once when timer reaches 10s remaining
+  // API trigger — fires exactly once when timer reaches its full allocated time remaining (beginning of cycle)
   const apiTriggeredRef = React.useRef(-1);
 
   useEffect(() => {
-    if (!isRunning || timeLeft !== GREEN_TIME) return;
+    if (!isRunning || timeLeft !== currentActiveTime) return;
     if (apiTriggeredRef.current === cycleIndex) return;
     apiTriggeredRef.current = cycleIndex;
 
     const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL?.replace(/\/+$/, '');
 
-    // Position 3 (4th signal = always D) → send A, B, C vehicle counts
+    // Position 3 (4th signal = always D) → send A, B, C vehicle counts for next cycle calculations
     if (positionInCycle === 3) {
-      console.log(`[Cycle ${cycleNumber}] 4th signal (${activeRoad}) started — calling /api/traffic/abc`);
+      console.log(`[Cycle ${cycleNumber}] 4th signal (${activeRoad}) started — calling /api/greentime/ABC`);
       fetch(`${baseUrl}/api/greentime/ABC`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ A: densities.A, B: densities.B, C: densities.C })
+        body: JSON.stringify({ A: sliderValues.A, B: sliderValues.B, C: sliderValues.C })
       }).then(async res => {
         const text = await res.text();
         if (!res.ok) throw new Error(`HTTP ${res.status}: ${text.substring(0, 100)}`);
         return JSON.parse(text);
       }).then(data => {
-        console.log('[API ABC Response]', data);
+        console.log('[API ABC Response next cycle]', data);
+        setCycleGreenTimes(prev => {
+           const arr = [...prev];
+           const nC = cycleNumber + 1;
+           if (!arr[nC]) arr[nC] = { A: 10, B: 10, C: 10, D: 10 };
+           arr[nC] = { ...arr[nC], A: data.A, B: data.B, C: data.C };
+           return arr;
+        });
       }).catch(err => console.error('[API ABC Error]', err));
     }
 
-    // Position 2 (3rd signal in priority order) → send D vehicle count
+    // Position 2 (3rd signal in priority order) → send D vehicle count for next cycle calculations
     if (positionInCycle === 2) {
-      console.log(`[Cycle ${cycleNumber}] 3rd signal (${activeRoad}) started — calling /api/traffic/d`);
+      console.log(`[Cycle ${cycleNumber}] 3rd signal (${activeRoad}) started — calling /api/greentime/D`);
       fetch(`${baseUrl}/api/greentime/D`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ D: densities.D })
+        body: JSON.stringify({ D: sliderValues.D })
       }).then(async res => {
         const text = await res.text();
         if (!res.ok) throw new Error(`HTTP ${res.status}: ${text.substring(0, 100)}`);
         return JSON.parse(text);
       }).then(data => {
-        console.log('[API D Response]', data);
+        console.log('[API D Response next cycle]', data);
+        setCycleGreenTimes(prev => {
+           const arr = [...prev];
+           const nC = cycleNumber + 1;
+           if (!arr[nC]) arr[nC] = { A: 10, B: 10, C: 10, D: 10 };
+           arr[nC] = { ...arr[nC], D: data.D };
+           return arr;
+        });
       }).catch(err => console.error('[API D Error]', err));
     }
-  }, [isRunning, timeLeft, cycleIndex, positionInCycle, cycleNumber, activeRoad, densities]);
+  }, [isRunning, timeLeft, cycleIndex, positionInCycle, cycleNumber, activeRoad, sliderValues, currentActiveTime]);
 
   // Countdown timer
   useEffect(() => {
     if (!isRunning) return;
     const interval = setInterval(() => {
       setTimeLeft(prev => {
-        if (prev <= 1) {
-          setCycleIndex(c => c + 1);
-          return -1;
-        }
+        if (prev <= 1) return -1;
         return prev - 1;
       });
     }, 1000);
@@ -155,7 +181,6 @@ export default function TrafficSimulation() {
   }, [isRunning]);
 
   const totalDensity = densities.A + densities.B + densities.C + densities.D;
-  const currentGreenTimes = { A: GREEN_TIME, B: GREEN_TIME, C: GREEN_TIME, D: GREEN_TIME };
 
   return (
     <div className="min-h-screen bg-[#F5F8FC] text-[#0B2A4A] p-6 flex flex-col font-sans selection:bg-[#2F80ED]/20">
@@ -258,6 +283,7 @@ export default function TrafficSimulation() {
                   setIsRunning(false);
                   setCycleIndex(0);
                   setTimeLeft(-1);
+                  setCycleGreenTimes([{ A: 10, B: 10, C: 10, D: 10 }]);
                 } else {
                   setDensities(sliderValues);
                   setIsRunning(true);
