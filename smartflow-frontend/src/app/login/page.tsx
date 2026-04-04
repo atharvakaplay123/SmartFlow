@@ -51,36 +51,121 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen h-screen overflow-hidden bg-slate-50 font-sans">
-      {/* ── LEFT PANEL: Branding & Features ── */}
-      <div className="hidden lg:flex flex-1 flex-col justify-center relative bg-gradient-to-br from-slate-900 via-slate-800 to-blue-950 p-16 xl:p-24 overflow-hidden">
-        {/* Glow Effects */}
-        <div className="absolute -top-32 -left-32 w-96 h-96 bg-blue-500/20 rounded-full blur-[100px] pointer-events-none" />
-        <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-cyan-500/10 rounded-full blur-[120px] pointer-events-none" />
-
-        <div className="relative z-10 w-full max-w-xl mx-auto flex flex-col justify-center h-full">
-          {/* Logo */}
-          <div className="flex items-center gap-4 mb-20">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-cyan-500 p-0.5 shadow-xl shadow-blue-500/30 flex items-center justify-center">
-              <svg className="w-9 h-9 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
+    <>
+      <style>{`
+        .page-bg {
+          background: radial-gradient(circle at left, #0F172A 0%, #1E293B 40%, #334155 70%, #F8FAFC 100%);
+        }
+        .left-panel-custom {
+          flex: 1;
+          position: relative;
+          padding: 60px;
+          color: white;
+          background: transparent;
+        }
+        .left-panel-custom::before {
+          content: "";
+          position: absolute;
+          top: 20%;
+          left: 10%;
+          width: 400px;
+          height: 400px;
+          background: radial-gradient(circle, rgba(56,189,248,0.25), transparent);
+          filter: blur(100px);
+          z-index: 0;
+        }
+        .left-panel-custom::after {
+          content: "";
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(135deg, rgba(255,255,255,0.02), transparent);
+        }
+        .heading-gradient {
+          font-size: 56px;
+          font-weight: 800;
+          line-height: 1.1;
+          background: linear-gradient(135deg, #38BDF8, #2563EB);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          margin-bottom: 2rem;
+        }
+        .logo-custom {
+          font-size: 24px;
+          font-weight: 700;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          margin-bottom: 5rem;
+        }
+        .logo-icon {
+          width: 48px;
+          height: 48px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 12px;
+          background: linear-gradient(to bottom right, #2563EB, #06b6d4);
+        }
+        .input-icon {
+          color: #2563EB;
+          font-size: 18px;
+          opacity: 0.9;
+        }
+        .login-card {
+          background: rgba(255,255,255,0.95);
+          backdrop-filter: blur(10px);
+          border-radius: 18px;
+          box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+          padding: 40px;
+          width: 100%;
+          max-width: 28rem;
+          position: relative;
+          z-index: 10;
+        }
+        .submit-btn {
+          background: linear-gradient(135deg, #2563EB, #38BDF8);
+          border: none;
+          border-radius: 10px;
+          color: white;
+          font-weight: 600;
+          box-shadow: 0 8px 25px rgba(37,99,235,0.4);
+          transition: all 0.3s ease;
+          width: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          padding: 14px 16px;
+        }
+        .submit-btn:hover:not(:disabled) {
+          transform: translateY(-2px);
+          box-shadow: 0 12px 30px rgba(37,99,235,0.5);
+        }
+      `}</style>
+      <div className="flex min-h-screen h-screen overflow-hidden page-bg font-sans">
+        {/* ── LEFT PANEL: Branding & Features ── */}
+        <div className="hidden lg:flex left-panel-custom overflow-hidden">
+          <div className="relative z-10 w-full max-w-xl mx-auto flex flex-col justify-center h-full">
+            {/* Logo */}
+            <div className="logo-custom">
+              <div className="logo-icon shadow-xl shadow-blue-500/30">
+                <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+              </div>
+              <span className="text-white tracking-widest uppercase">SmartFlow</span>
             </div>
-            <span className="text-4xl font-extrabold text-white tracking-widest uppercase">SmartFlow</span>
-          </div>
 
-          <h1 className="text-6xl lg:text-7xl font-extrabold text-white leading-tight mb-8 tracking-tight">
-            AI-Powered <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300 leading-snug block pb-2 mt-4">
+            <h1 className="heading-gradient">
+              AI-Powered <br />
               Traffic Intelligence
-            </span>
-          </h1>
+            </h1>
+          </div>
         </div>
-      </div>
 
-      {/* ── RIGHT PANEL: Login Form ── */}
-      <div className="flex-1 flex items-center justify-center p-6 sm:p-12 relative">
-        <div className="w-full max-w-md bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 p-8 sm:p-10 relative z-10">
+        {/* ── RIGHT PANEL: Login Form ── */}
+        <div className="flex-1 flex items-center justify-center p-6 sm:p-12 relative">
+          <div className="login-card">
 
           <div className="mb-8">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-50 text-green-600 text-xs font-semibold tracking-wide uppercase mb-6 border border-green-100">
@@ -97,7 +182,7 @@ export default function LoginPage() {
               <label className="text-xs font-bold text-slate-600 uppercase tracking-wide">Email / Admin ID</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <svg className="h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="input-icon w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                   </svg>
                 </div>
@@ -117,7 +202,7 @@ export default function LoginPage() {
               <label className="text-xs font-bold text-slate-600 uppercase tracking-wide">Password</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <svg className="h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="input-icon w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                   </svg>
                 </div>
@@ -153,7 +238,7 @@ export default function LoginPage() {
               <label className="text-xs font-bold text-slate-600 uppercase tracking-wide">Control Area</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <svg className="h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="input-icon w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
@@ -190,7 +275,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full flex items-center justify-center gap-2 py-3.5 px-4 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white rounded-xl font-semibold shadow-lg shadow-blue-500/25 transition-all transform hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
+              className="submit-btn"
             >
               {loading ? (
                 <>
@@ -219,7 +304,8 @@ export default function LoginPage() {
             </div>
           </div>
         </div>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
