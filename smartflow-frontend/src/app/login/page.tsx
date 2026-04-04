@@ -3,11 +3,9 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 
-const AREAS = ["Sector 1", "Sector 2", "Sector 3", "Sector 4"];
-
 export default function LoginPage() {
   const router = useRouter();
-  const [form, setForm] = useState({ email: "", password: "", area: AREAS[0] });
+  const [form, setForm] = useState({ email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -26,7 +24,6 @@ export default function LoginPage() {
         body: JSON.stringify({
           email: form.email,
           password: form.password,
-          area: form.area,
         }),
       });
 
@@ -233,40 +230,7 @@ export default function LoginPage() {
               </div>
             </div>
 
-            {/* Area Field */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-600 uppercase tracking-wide">Control Area</label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <svg className="input-icon w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                </div>
-                <select
-                  className="w-full pl-11 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-900 font-medium appearance-none cursor-pointer"
-                  value={form.area}
-                  onChange={handleChange("area")}
-                >
-                  {AREAS.map((a) => (
-                    <option key={a} value={a}>
-                      {a}
-                    </option>
-                  ))}
-                </select>
-                <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
-                  <svg className="h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between pt-1">
-              <div className="flex items-center">
-                <input id="remember" type="checkbox" className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500/30" />
-                <label htmlFor="remember" className="ml-2 text-sm text-slate-600">Remember me</label>
-              </div>
+            <div className="flex justify-end pt-2">
               <button type="button" className="text-sm font-semibold text-blue-600 hover:text-blue-500 transition-colors">
                 Forgot password?
               </button>
@@ -290,7 +254,7 @@ export default function LoginPage() {
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
                   </svg>
-                  Login to Control Area
+                  Login Securely
                 </>
               )}
             </button>

@@ -17,41 +17,49 @@ function ControlView() {
   };
 
   return (
-    <div className="flex-1 max-w-5xl w-full mx-auto flex flex-col justify-center space-y-6">
+    <div className="flex-1 max-w-5xl w-full mx-auto flex flex-col">
       
-      {/* Header */}
-      <div className="flex items-center justify-between mb-2">
-        <div>
-          <h2 className="text-2xl font-bold text-[#0A192F]">Manual Override Control</h2>
-          <p className="text-slate-500 text-sm mt-1">Directly manage intersection priorities.</p>
-        </div>
-        <div className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest border ${manualOverride ? 'bg-amber-100 text-amber-700 border-amber-200 shadow-sm' : 'bg-slate-100 text-slate-500 border-slate-200'}`}>
-           Control Mode: {manualOverride ? 'MANUAL' : 'AUTO (AI)'}
-        </div>
-      </div>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
+      {/* 2-Column Responsive Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-[65fr_35fr] gap-4 items-start">
         
-        {/* Main Control Panel (2 cols wide) */}
-        <div className={`lg:col-span-2 bg-white border rounded-2xl p-8 transition-all shadow-sm flex flex-col ${manualOverride ? 'border-amber-400 shadow-[0_0_20px_rgba(251,191,36,0.1)]' : 'border-slate-200'}`}>
+        {/* 🔵 LEFT SECTION (MAIN CONTROL) */}
+        <div className="bg-white rounded-[16px] p-4 border border-gray-200 flex flex-col">
           
-          <div className="h-14 mb-8 flex items-center border-b border-slate-100 pb-6">
+          {/* 1. Header */}
+          <div className="mb-2">
+            <h2 className="text-2xl font-bold text-[#0A192F]">Manual Override Control</h2>
+            <p className="text-slate-500 text-sm mt-1">Directly manage intersection priorities</p>
+          </div>
+
+          {/* 2. Status Bar */}
+          <div className="flex flex-col mb-4 p-4 bg-slate-50 border border-slate-100 rounded-xl justify-center min-h-[80px]">
              {manualOverride ? (
-               <div className="flex flex-col">
-                 <span className="text-emerald-600 font-bold text-xl flex items-center gap-2">
-                   <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span>
+               <div className="flex flex-col gap-1.5">
+                 <span className="text-green-600 font-bold text-lg flex items-center gap-2">
+                   <span className="w-2.5 h-2.5 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]"></span>
                    Manual Priority Active: Road {selectedOverrideRoad}
                  </span>
-                 <span className="text-amber-600 text-xs font-semibold uppercase tracking-wider mt-1.5">⚠️ AI optimization is temporarily disabled</span>
+                 <span className="text-amber-600 text-xs font-semibold uppercase tracking-wider">
+                   ⚠ AI Optimization Disabled
+                 </span>
                </div>
              ) : (
-               <span className="text-slate-400 text-sm font-medium">System is under automated AI control. No overrides active.</span>
+               <div className="flex flex-col gap-1.5">
+                 <span className="text-slate-600 font-bold text-lg flex items-center gap-2">
+                   <span className="w-2.5 h-2.5 rounded-full bg-slate-400"></span>
+                   System under Auto (AI) Control
+                 </span>
+                 <span className="text-slate-500 text-xs font-semibold uppercase tracking-wider">
+                   Select a road to initiate override
+                 </span>
+               </div>
              )}
           </div>
 
-          <div className="mb-8 p-6 bg-slate-50 border border-slate-100 rounded-xl">
-             <label className="text-xs uppercase tracking-widest text-[#0A192F] font-bold mb-4 block">Select Road for PRIORITY GREEN</label>
-             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* 3. Road Selection Grid */}
+          <div className="mb-4">
+             <label className="text-xs uppercase tracking-widest text-[#0A192F] font-bold mb-4 block">Select priority road</label>
+             <div className="grid grid-cols-4 gap-4">
                 {roads.map(road => {
                   const isSelected = manualOverride && selectedOverrideRoad === road;
                   return (
@@ -61,12 +69,12 @@ function ControlView() {
                           if (manualOverride) setOverride(true, road);
                       }}
                       disabled={!manualOverride}
-                      className={`py-5 rounded-xl font-bold transition-all border ${
+                      className={`h-[64px] rounded-[12px] font-semibold transition-all flex items-center justify-center ${
                          !manualOverride 
-                           ? 'bg-white text-slate-400 border-slate-200 cursor-not-allowed opacity-80'
+                           ? 'bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed opacity-80'
                            : isSelected 
-                             ? 'bg-emerald-500 text-white border-emerald-600 shadow-[0_0_15px_rgba(16,185,129,0.3)] transform scale-105 z-10'
-                             : 'bg-rose-50 text-rose-500 border-rose-200 hover:bg-rose-100 active:scale-95'
+                             ? 'bg-green-600 text-white shadow-md'
+                             : 'bg-red-50 text-red-500 border border-red-500 hover:bg-red-100'
                       }`}
                     >
                       ROAD {road}
@@ -76,46 +84,43 @@ function ControlView() {
              </div>
           </div>
           
-          <div className="flex gap-4 mt-auto pt-4">
+          {/* 4. ACTION BUTTONS (SAME ROW) */}
+          <div className="flex gap-4 mt-auto">
              <button 
                onClick={() => setOverride(true, 'A')}
                disabled={manualOverride}
-               className={`flex-1 py-4 px-6 rounded-xl font-bold transition-all ${
-                 !manualOverride ? 'bg-[#0A192F] text-white hover:bg-[#11294F] shadow-md active:scale-95' : 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200'
-               }`}
+               className="flex-1 h-14 bg-blue-600 text-white font-bold rounded-xl transition-all disabled:bg-slate-200 disabled:text-slate-400"
              >
                Activate Override
              </button>
              <button 
                onClick={() => setOverride(false)}
                disabled={!manualOverride}
-               className={`flex-1 py-4 px-6 rounded-xl font-bold transition-all border ${
-                 manualOverride ? 'bg-white border-rose-200 text-rose-600 hover:bg-rose-50 hover:border-rose-300 shadow-sm active:scale-95' : 'bg-slate-50 border-transparent text-slate-400 cursor-not-allowed'
-               }`}
+               className="flex-1 h-14 bg-transparent border-2 border-red-500 text-red-500 font-bold rounded-xl transition-all hover:bg-red-50 disabled:opacity-50 disabled:border-slate-200 disabled:text-slate-400"
              >
                Deactivate Override
              </button>
           </div>
         </div>
         
-        {/* Right Info Column */}
-        <div className="flex flex-col gap-6">
+        {/* 🟣 RIGHT SECTION (SIDE PANEL) */}
+        <div className="flex flex-col space-y-4">
           
-          {/* Signal Status */}
-          <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+          {/* 1. Current Signal Status */}
+          <div className="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm">
              <h3 className="text-xs uppercase tracking-widest text-[#0A192F] font-bold mb-4">Current Signal Status</h3>
              <div className="space-y-3">
                {roads.map(road => {
-                 const isGreen = manualOverride ? selectedOverrideRoad === road : road === 'A'; // auto sets A as placeholder green
+                 const isGreen = manualOverride ? selectedOverrideRoad === road : road === 'A';
                  return (
                    <div key={road} className="flex items-center justify-between">
-                     <span className="text-sm font-semibold text-slate-600 w-16">Road {road}</span>
+                     <span className="text-sm font-semibold text-slate-600">Road {road}</span>
                      {!manualOverride ? (
-                       <span className="text-xs font-bold text-slate-400 bg-slate-100 px-3 py-1 rounded">AUTO</span>
+                       <span className="text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1 rounded-full">AUTO</span>
                      ) : isGreen ? (
-                       <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1 rounded border border-emerald-200 shadow-[0_0_8px_rgba(16,185,129,0.2)]">GREEN</span>
+                       <span className="text-xs font-bold text-green-700 bg-green-100 px-3 py-1 rounded-full border border-green-200">GREEN</span>
                      ) : (
-                       <span className="text-xs font-bold text-rose-600 bg-rose-50 px-3 py-1 rounded border border-rose-200">RED</span>
+                       <span className="text-xs font-bold text-red-700 bg-red-100 px-3 py-1 rounded-full border border-red-200">RED</span>
                      )}
                    </div>
                  )
@@ -123,14 +128,13 @@ function ControlView() {
              </div>
           </div>
           
-          {/* Override History */}
-          <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm flex-1">
-             <h3 className="text-xs uppercase tracking-widest text-[#0A192F] font-bold mb-4 flex items-center gap-2">
-               <span>🕒</span> Override Activity
-             </h3>
+          {/* 2. Override Activity */}
+          <div className="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm">
+             <h3 className="text-xs uppercase tracking-widest text-[#0A192F] font-bold mb-4">Override Activity</h3>
              <div className="space-y-4">
                 {(overrideHistory || []).map((item, idx) => (
-                  <div key={idx} className="flex flex-col border-l-2 border-indigo-200 pl-3">
+                  <div key={idx} className="flex flex-col border-l-2 border-slate-300 pl-3 relative">
+                    <div className="absolute w-1.5 h-1.5 bg-slate-400 rounded-full -left-[4px] top-1.5"></div>
                     <span className="text-[10px] uppercase font-bold text-slate-400 mb-0.5">{getTimeAgo(item.time)}</span>
                     <span className="text-sm font-medium text-slate-700">{item.action}</span>
                   </div>
@@ -141,14 +145,13 @@ function ControlView() {
              </div>
           </div>
           
-          {/* Info Panel */}
-          <div className="bg-indigo-50 border border-indigo-100 rounded-2xl p-6 shadow-sm">
-             <h3 className="text-xs uppercase tracking-widest text-indigo-800 font-bold mb-3 flex items-center gap-2">
-               <span>ℹ️</span> Logic Rules
-             </h3>
-             <ul className="text-xs text-indigo-700 space-y-2 leading-relaxed">
+          {/* 3. Logic Rules */}
+          <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 shadow-sm">
+             <h3 className="text-xs uppercase tracking-widest text-slate-700 font-bold mb-3">Logic Rules</h3>
+             <ul className="text-xs text-slate-600 space-y-2 leading-relaxed">
                <li>• Overrides AI decisions instantly.</li>
-               <li>• Only one road stays GREEN.</li>
+               <li>• Only one priority road stays green.</li>
+               <li>• Action logs are recorded sequentially.</li>
                <li>• System resets to AI when deactivated.</li>
              </ul>
           </div>
@@ -297,6 +300,9 @@ export default function AdminDashboardPage() {
     { name: "Dashboard", href: "#", icon: "🧠" },
     { name: "Control", href: "#", icon: "⚙️" },
     { name: "Analytics", href: "#", icon: "📈" },
+    { name: "Emergency Override", href: "/emergency", icon: "🚨" },
+    { name: "Alerts", href: "/alerts", icon: "🔔" },
+    { name: "Profile", href: "/profile", icon: "👤" },
   ];
 
   if (!mounted) return null;
@@ -322,7 +328,7 @@ export default function AdminDashboardPage() {
   return (
     <div className="flex h-screen bg-slate-50 overflow-hidden font-sans text-slate-800">
       {/* ── SIDEBAR ── */}
-      <aside className="w-64 bg-[#0A192F] flex flex-col shadow-xl z-20 flex-shrink-0">
+      <aside className="w-64 bg-[#0A192F] flex flex-col shadow-xl z-20 flex-shrink-0 h-screen">
         <div className="flex-1 flex flex-col h-full">
           {/* Logo */}
           <div className="h-20 flex items-center px-6 border-b border-white/10 shrink-0">
@@ -335,12 +341,16 @@ export default function AdminDashboardPage() {
           </div>
 
           {/* Navigation */}
-          <nav className="p-4 space-y-2 mt-4 flex-1">
+          <nav className="p-4 space-y-2 mt-4 flex-1 overflow-y-auto">
             {navItems.map((item) => (
               <button
                 key={item.name}
                 onClick={() => {
-                  setActiveTab(item.name);
+                  if (item.href.startsWith('/')) {
+                    router.push(item.href);
+                  } else {
+                    setActiveTab(item.name);
+                  }
                 }}
                 className={`w-full flex items-center gap-4 px-4 py-3 rounded-lg transition-all duration-200 ${activeTab === item.name
                     ? "bg-white/10 text-white font-semibold"
@@ -460,20 +470,19 @@ export default function AdminDashboardPage() {
 
               {/* MAIN ACTION */}
               <section className="pt-6 pb-12 flex justify-center mt-auto">
-                <button
-                  onClick={() => router.push('/simulation')}
+                <a href="https://smartflow-traffic-simulation.vercel.app/"
                   className="group px-10 py-4 bg-[#0A192F] hover:bg-[#11294F] transition-all rounded-xl font-bold shadow-md active:scale-95 text-white flex items-center gap-3 relative overflow-hidden"
                 >
                   <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
                   <span className="text-xl relative z-10">🚀</span>
                   <span className="text-lg tracking-wide relative z-10">Run Live Simulation</span>
-                </button>
+                </a>
               </section>
             </>
           )}
 
           {activeTab === 'Control' && (
-            <div className="flex-1 flex items-center justify-center py-10 w-full">
+            <div className="flex-1 flex flex-col items-start justify-start w-full">
               <ControlView />
             </div>
           )}

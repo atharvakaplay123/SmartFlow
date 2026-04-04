@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 
 const navItems = [
@@ -21,11 +22,13 @@ export default function Sidebar() {
       {/* Logo */}
       <div className="px-6 py-5 border-b border-[#1e2d4d]">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/30">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-white">
-              <circle cx="12" cy="12" r="3" fill="white" />
-              <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" stroke="white" strokeWidth="2" strokeLinecap="round" />
-            </svg>
+          <div className="w-9 h-9 rounded-xl overflow-hidden">
+            <Image
+              src="/logo.png"
+              alt="logo"
+              width={36}
+              height={36}
+            />
           </div>
           <div>
             <p className="text-white font-bold text-sm leading-tight">SmartFlow</p>
