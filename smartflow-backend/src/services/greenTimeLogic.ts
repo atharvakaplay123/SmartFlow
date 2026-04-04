@@ -30,12 +30,8 @@ export async function greenTimeLogicABC(vehicleCount: vehicleCountABC):Promise<v
   };
 
   // 🔥 Optional: priority order
-  const priority = (["A", "B", "C"] as (keyof vehicleCountABC)[])
-    .sort((r1, r2) => result[r2] - result[r1]);
-
-  console.log("🚦 Total Vehicles:", totalVehicles);
-  console.log("⏱ Selected Cycle Time:", TOTAL_TIME);
-  console.log("🚦 Priority Order:", priority);
+  // const priority = (["A", "B", "C"] as (keyof vehicleCountABC)[])
+  //   .sort((r1, r2) => result[r2] - result[r1]);
 
   return result;
 }
