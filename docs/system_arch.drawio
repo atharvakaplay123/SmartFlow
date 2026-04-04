@@ -1,0 +1,58 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Page-1" id="eDQuERQhbSy8KFSynGd7">
+    <mxGraphModel dx="2867" dy="2719" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="jri7D4stbWb80Q6WYzrs-27" parent="1" style="swimlane;whiteSpace=wrap;html=1;fillColor=#FAE5C7;fontColor=#143642;strokeColor=#0F8B8D;labelBackgroundColor=none;" value="signal point" vertex="1">
+          <mxGeometry height="138" width="720" x="28" y="29" as="geometry" />
+        </mxCell>
+        <mxCell id="jri7D4stbWb80Q6WYzrs-29" parent="jri7D4stbWb80Q6WYzrs-27" style="swimlane;whiteSpace=wrap;html=1;fillColor=#FAE5C7;fontColor=#143642;strokeColor=#0F8B8D;labelBackgroundColor=none;" value="CAMERA" vertex="1">
+          <mxGeometry height="61" width="306" x="34" y="38" as="geometry" />
+        </mxCell>
+        <mxCell id="jri7D4stbWb80Q6WYzrs-30" parent="jri7D4stbWb80Q6WYzrs-27" style="swimlane;whiteSpace=wrap;html=1;fillColor=#FAE5C7;fontColor=#143642;strokeColor=#0F8B8D;labelBackgroundColor=none;" value="TRAFFC LIGHT" vertex="1">
+          <mxGeometry height="76" width="200" x="471" y="45" as="geometry" />
+        </mxCell>
+        <mxCell id="jri7D4stbWb80Q6WYzrs-61" parent="jri7D4stbWb80Q6WYzrs-30" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;labelBackgroundColor=none;fontColor=#143642;" value="priority based timming&amp;nbsp;" vertex="1">
+          <mxGeometry height="30" width="117" x="41.5" y="32" as="geometry" />
+        </mxCell>
+        <mxCell id="jri7D4stbWb80Q6WYzrs-28" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FAE5C7;fontColor=#143642;strokeColor=#0F8B8D;labelBackgroundColor=none;" value="SMART--FLOW" vertex="1">
+          <mxGeometry height="35" width="176" x="307" y="-11" as="geometry" />
+        </mxCell>
+        <mxCell id="jri7D4stbWb80Q6WYzrs-44" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=#0F8B8D;fillColor=#FAE5C7;align=center;verticalAlign=middle;rounded=0;fontColor=#143642;labelBackgroundColor=none;" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;it captures the image&amp;nbsp;&lt;/font&gt;" vertex="1">
+          <mxGeometry height="30" width="241" x="82" y="91" as="geometry" />
+        </mxCell>
+        <mxCell id="jri7D4stbWb80Q6WYzrs-52" parent="1" style="swimlane;whiteSpace=wrap;html=1;startSize=23;fillColor=#FAE5C7;fontColor=#143642;strokeColor=#0F8B8D;labelBackgroundColor=none;" value="backend" vertex="1">
+          <mxGeometry height="238.00222222222214" width="728" x="28" y="249" as="geometry" />
+        </mxCell>
+        <mxCell id="jri7D4stbWb80Q6WYzrs-54" parent="jri7D4stbWb80Q6WYzrs-52" style="swimlane;whiteSpace=wrap;html=1;fillColor=#FAE5C7;fontColor=#143642;strokeColor=#0F8B8D;labelBackgroundColor=none;" value="gemini" vertex="1">
+          <mxGeometry height="89" width="200" x="87" y="39" as="geometry" />
+        </mxCell>
+        <mxCell id="jri7D4stbWb80Q6WYzrs-55" parent="jri7D4stbWb80Q6WYzrs-54" style="text;html=1;whiteSpace=wrap;strokeColor=#0F8B8D;fillColor=#FAE5C7;align=center;verticalAlign=middle;rounded=0;fontColor=#143642;labelBackgroundColor=none;" value="it&amp;nbsp; count the number of vehicle" vertex="1">
+          <mxGeometry height="59" width="124" x="33" y="23" as="geometry" />
+        </mxCell>
+        <mxCell id="jri7D4stbWb80Q6WYzrs-53" edge="1" parent="1" source="jri7D4stbWb80Q6WYzrs-29" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fillColor=#FAE5C7;strokeColor=#A8201A;labelBackgroundColor=none;fontColor=default;" target="jri7D4stbWb80Q6WYzrs-54">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="215" y="307.2222222222222" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="jri7D4stbWb80Q6WYzrs-60" edge="1" parent="1" source="jri7D4stbWb80Q6WYzrs-57" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fillColor=#FAE5C7;strokeColor=#A8201A;labelBackgroundColor=none;fontColor=default;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="591" y="150.55555555555543" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="jri7D4stbWb80Q6WYzrs-57" parent="1" style="swimlane;whiteSpace=wrap;html=1;fillColor=#FAE5C7;fontColor=#143642;strokeColor=#0F8B8D;labelBackgroundColor=none;" value="server" vertex="1">
+          <mxGeometry height="84" width="200" x="491" y="290" as="geometry" />
+        </mxCell>
+        <mxCell id="jri7D4stbWb80Q6WYzrs-58" parent="jri7D4stbWb80Q6WYzrs-57" style="text;html=1;whiteSpace=wrap;strokeColor=#0F8B8D;fillColor=#FAE5C7;align=center;verticalAlign=middle;rounded=0;fontColor=#143642;labelBackgroundColor=none;" value="calcute the timmer logic&amp;nbsp;" vertex="1">
+          <mxGeometry height="58" width="131" x="34.5" y="21" as="geometry" />
+        </mxCell>
+        <mxCell id="jri7D4stbWb80Q6WYzrs-56" edge="1" parent="1" source="jri7D4stbWb80Q6WYzrs-54" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fillColor=#FAE5C7;strokeColor=#A8201A;labelBackgroundColor=none;fontColor=default;" target="jri7D4stbWb80Q6WYzrs-57">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="407.33333333333326" y="332.5" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
